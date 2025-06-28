@@ -13,39 +13,18 @@ pipeline {
             parallel {
                 stage('Build Frontend') {
                     steps {
-                        script {
-                            sh """
-                                docker run --rm \
-                                    -v \$(pwd):/workspace \
-                                    -w /workspace/${FRONTEND_DIR} \
-                                    -u \$(id -u):\$(id -g) \
-                                    -e HOME=/tmp \
-                                    -e npm_config_cache=/tmp/.npm \
-                                    node:20 sh -c '
-                                        npm ci
-                                        npm run build
-                                    '
-                            """
+                        dir("${FRONTEND_DIR}") {
+                            sh 'npm ci'
+                            sh 'npm run build'
                         }
                     }
                 }
                 
                 stage('Build Backend') {
                     steps {
-                        script {
-                            sh """
-                                docker run --rm \
-                                    -v \$(pwd):/workspace \
-                                    -w /workspace/${BACKEND_DIR} \
-                                    -u \$(id -u):\$(id -g) \
-                                    -e HOME=/tmp \
-                                    -e DOTNET_CLI_HOME=/tmp \
-                                    -e NUGET_PACKAGES=/tmp/.nuget/packages \
-                                    mcr.microsoft.com/dotnet/sdk:8.0 sh -c '
-                                        dotnet restore
-                                        dotnet build --no-restore --configuration Release
-                                    '
-                            """
+                        dir("${BACKEND_DIR}") {
+                            sh 'dotnet restore'
+                            sh 'dotnet build --no-restore --configuration Release'
                         }
                     }
                 }
@@ -55,39 +34,16 @@ pipeline {
         stage('Test') {
             parallel {
                 stage('Test Frontend') {
-                    steps {
-                        script {
-                            sh """
-                                docker run --rm \
-                                    -v \$(pwd):/workspace \
-                                    -w /workspace/${FRONTEND_DIR} \
-                                    -u \$(id -u):\$(id -g) \
-                                    -e HOME=/tmp \
-                                    -e npm_config_cache=/tmp/.npm \
-                                    node:20 sh -c '
-                                        npm ci
-                                        npm run test
-                                    '
-                            """
-                        }
+                    dir("${FRONTEND_DIR}") {
+                        sh 'npm ci'
+                        sh 'npm run test'
                     }
                 }
                 
                 stage('Test Backend') {
                     steps {
-                        script {
-                            sh """
-                                docker run --rm \
-                                    -v \$(pwd):/workspace \
-                                    -w /workspace/${BACKEND_DIR} \
-                                    -u \$(id -u):\$(id -g) \
-                                    -e HOME=/tmp \
-                                    -e DOTNET_CLI_HOME=/tmp \
-                                    -e NUGET_PACKAGES=/tmp/.nuget/packages \
-                                    mcr.microsoft.com/dotnet/sdk:8.0 sh -c '
-                                        dotnet test
-                                    '
-                            """
+                        dir("${BACKEND_DIR}") {
+                            sh 'dotnet test'
                         }
                     }
                 }
