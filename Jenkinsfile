@@ -4,8 +4,8 @@ pipeline {
     environment {
         FRONTEND_DIR = 'frontend'
         BACKEND_DIR = 'backend'
-        IMAGE_NAME_FRONTEND = "${DOCKER_REGISTRY_USER}/devops-masters-frontend"
-        IMAGE_NAME_BACKEND = "${DOCKER_REGISTRY_USER}/devops-masters-backend"
+        IMAGE_NAME_FRONTEND = "georgesh08/devops-masters-frontend"
+        IMAGE_NAME_BACKEND = "georgesh08/devops-masters-backend"
     }
     
     stages {
