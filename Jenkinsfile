@@ -89,6 +89,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Frontend') {
+            steps {
+                script {
+                    sh """
+                        kubectl set image deployment/frontend frontend=georgesh/devops-masters-frontend:latest
+                        kubectl rollout status deployment/frontend --timeout=300s
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Backend') {
+            steps {
+                script {
+                    sh """
+                        kubectl set image deployment/backend backend=georgesh/devops-masters-backend:latest
+                        kubectl rollout status deployment/backend --timeout=300s
+                    """
+                }
+            }
+        }
     }
     
     post {
