@@ -1,0 +1,67 @@
+stages:
+  - build
+  - test
+  - publish
+
+variables:
+  FRONTEND_DIR: frontend
+  BACKEND_DIR: backend
+
+build_frontend:
+  stage: build
+  image: node:20
+  script:
+    - cd $FRONTEND_DIR
+    - npm ci
+    - npm run build
+
+build_backend:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - cd $BACKEND_DIR
+    - dotnet restore
+    - dotnet build --no-restore --configuration Release
+
+test_frontend:
+  stage: test
+  image: node:20
+  script:
+    - cd $FRONTEND_DIR
+    - npm ci
+    - npm run test
+
+test_backend:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - cd $BACKEND_DIR
+    - dotnet test
+
+publish_frontend:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    IMAGE_NAME_FRONTEND: "$DOCKER_REGISTRY_USER/devops-masters-frontend"
+  script:
+    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSWORD
+
+    - docker build -t $IMAGE_NAME_FRONTEND:$CI_COMMIT_SHA -t $IMAGE_NAME_FRONTEND:latest $FRONTEND_DIR
+    - docker push $IMAGE_NAME_FRONTEND:$CI_COMMIT_SHA
+    - docker push $IMAGE_NAME_FRONTEND:latest
+
+publish_backend:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    IMAGE_NAME_BACKEND: "$DOCKER_REGISTRY_USER/devops-masters-backend"
+  script:
+    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSWORD
+
+    - docker build -t $IMAGE_NAME_BACKEND:$CI_COMMIT_SHA -t $IMAGE_NAME_BACKEND:latest $BACKEND_DIR
+    - docker push $IMAGE_NAME_BACKEND:$CI_COMMIT_SHA
+    - docker push $IMAGE_NAME_BACKEND:latest
