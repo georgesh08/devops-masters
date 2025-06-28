@@ -53,7 +53,6 @@ public class TelegramNotificationService : INotificationService
         return $"""
                 ✈️ <b>Новый рейс создан!</b>
 
-                📋 <b>ID:</b> {flight.Id}
                 🛫 <b>Откуда:</b> {flight.DepartureAirport}
                 🛬 <b>Куда:</b> {flight.DestinationAirport}
                 📅 <b>Дата вылета:</b> {flight.DepartureDateTime:dd.MM.yyyy HH:mm}

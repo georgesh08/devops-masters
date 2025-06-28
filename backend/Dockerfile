@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . ./src/
 WORKDIR /app/src
 
-RUN dotnet restore
+RUN dotnet restore --disable-parallel --verbosity minimal
 RUN dotnet publish -c Release -o /publish
 
 
