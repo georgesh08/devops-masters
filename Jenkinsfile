@@ -34,9 +34,11 @@ pipeline {
         stage('Test') {
             parallel {
                 stage('Test Frontend') {
-                    dir("${FRONTEND_DIR}") {
-                        sh 'npm ci'
-                        sh 'npm run test'
+                    steps{
+                        dir("${FRONTEND_DIR}") {
+                            sh 'npm ci'
+                            sh 'npm run test'
+                        }
                     }
                 }
                 
