@@ -12,31 +12,40 @@ pipeline {
         stage('Build') {
             parallel {
                 stage('Build Frontend') {
-                    agent {
-                        docker {
-                            image 'node:20'
-                            reuseNode true
-                        }
-                    }
                     steps {
-                        dir("${FRONTEND_DIR}") {
-                            sh 'npm ci'
-                            sh 'npm run build'
+                        script {
+                            sh """
+                                docker run --rm \
+                                    -v \$(pwd):/workspace \
+                                    -w /workspace/${FRONTEND_DIR} \
+                                    -u \$(id -u):\$(id -g) \
+                                    -e HOME=/tmp \
+                                    -e npm_config_cache=/tmp/.npm \
+                                    node:20 sh -c '
+                                        npm ci
+                                        npm run build
+                                    '
+                            """
                         }
                     }
                 }
                 
                 stage('Build Backend') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/dotnet/sdk:8.0'
-                            reuseNode true
-                        }
-                    }
                     steps {
-                        dir("${BACKEND_DIR}") {
-                            sh 'dotnet restore'
-                            sh 'dotnet build --no-restore --configuration Release'
+                        script {
+                            sh """
+                                docker run --rm \
+                                    -v \$(pwd):/workspace \
+                                    -w /workspace/${BACKEND_DIR} \
+                                    -u \$(id -u):\$(id -g) \
+                                    -e HOME=/tmp \
+                                    -e DOTNET_CLI_HOME=/tmp \
+                                    -e NUGET_PACKAGES=/tmp/.nuget/packages \
+                                    mcr.microsoft.com/dotnet/sdk:8.0 sh -c '
+                                        dotnet restore
+                                        dotnet build --no-restore --configuration Release
+                                    '
+                            """
                         }
                     }
                 }
@@ -46,30 +55,39 @@ pipeline {
         stage('Test') {
             parallel {
                 stage('Test Frontend') {
-                    agent {
-                        docker {
-                            image 'node:20'
-                            reuseNode true
-                        }
-                    }
                     steps {
-                        dir("${FRONTEND_DIR}") {
-                            sh 'npm ci'
-                            sh 'npm run test'
+                        script {
+                            sh """
+                                docker run --rm \
+                                    -v \$(pwd):/workspace \
+                                    -w /workspace/${FRONTEND_DIR} \
+                                    -u \$(id -u):\$(id -g) \
+                                    -e HOME=/tmp \
+                                    -e npm_config_cache=/tmp/.npm \
+                                    node:20 sh -c '
+                                        npm ci
+                                        npm run test
+                                    '
+                            """
                         }
                     }
                 }
                 
                 stage('Test Backend') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/dotnet/sdk:8.0'
-                            reuseNode true
-                        }
-                    }
                     steps {
-                        dir("${BACKEND_DIR}") {
-                            sh 'dotnet test'
+                        script {
+                            sh """
+                                docker run --rm \
+                                    -v \$(pwd):/workspace \
+                                    -w /workspace/${BACKEND_DIR} \
+                                    -u \$(id -u):\$(id -g) \
+                                    -e HOME=/tmp \
+                                    -e DOTNET_CLI_HOME=/tmp \
+                                    -e NUGET_PACKAGES=/tmp/.nuget/packages \
+                                    mcr.microsoft.com/dotnet/sdk:8.0 sh -c '
+                                        dotnet test
+                                    '
+                            """
                         }
                     }
                 }
@@ -79,36 +97,34 @@ pipeline {
         stage('Publish') {
             parallel {
                 stage('Publish Frontend') {
-                    agent {
-                        docker {
-                            image 'docker:latest'
-                            args '-v /var/run/docker.sock:/var/run/docker.sock'
-                        }
-                    }
                     steps {
                         script {
-                            docker.withRegistry('', 'docker-registry-credentials') {
-                                def frontendImage = docker.build("${IMAGE_NAME_FRONTEND}:${env.GIT_COMMIT}", "${FRONTEND_DIR}")
-                                frontendImage.push("${env.GIT_COMMIT}")
-                                frontendImage.push("latest")
+                            withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', 
+                                                            usernameVariable: 'DOCKER_USER', 
+                                                            passwordVariable: 'DOCKER_PASS')]) {
+                                sh """
+                                    docker login -u \$DOCKER_USER -p \$DOCKER_PASS
+                                    docker build -t ${IMAGE_NAME_FRONTEND}:${env.GIT_COMMIT} -t ${IMAGE_NAME_FRONTEND}:latest ${FRONTEND_DIR}
+                                    docker push ${IMAGE_NAME_FRONTEND}:${env.GIT_COMMIT}
+                                    docker push ${IMAGE_NAME_FRONTEND}:latest
+                                """
                             }
                         }
                     }
                 }
                 
                 stage('Publish Backend') {
-                    agent {
-                        docker {
-                            image 'docker:latest'
-                            args '-v /var/run/docker.sock:/var/run/docker.sock'
-                        }
-                    }
                     steps {
                         script {
-                            docker.withRegistry('', 'docker-registry-credentials') {
-                                def backendImage = docker.build("${IMAGE_NAME_BACKEND}:${env.GIT_COMMIT}", "${BACKEND_DIR}")
-                                backendImage.push("${env.GIT_COMMIT}")
-                                backendImage.push("latest")
+                            withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', 
+                                                            usernameVariable: 'DOCKER_USER', 
+                                                            passwordVariable: 'DOCKER_PASS')]) {
+                                sh """
+                                    docker login -u \$DOCKER_USER -p \$DOCKER_PASS
+                                    docker build -t ${IMAGE_NAME_BACKEND}:${env.GIT_COMMIT} -t ${IMAGE_NAME_BACKEND}:latest ${BACKEND_DIR}
+                                    docker push ${IMAGE_NAME_BACKEND}:${env.GIT_COMMIT}
+                                    docker push ${IMAGE_NAME_BACKEND}:latest
+                                """
                             }
                         }
                     }
@@ -119,6 +135,9 @@ pipeline {
     
     post {
         always {
+            script {
+                sh 'docker system prune -f || true'
+            }
             cleanWs()
         }
         success {
