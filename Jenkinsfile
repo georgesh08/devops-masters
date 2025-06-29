@@ -33,7 +33,7 @@ pipeline {
 
         stage('Sonarqube scan') {
             parallel {
-                stage('Scan Frontend') {
+                stage('Analyze Frontend') {
                     steps {
                         dir("${FRONTEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
@@ -41,6 +41,7 @@ pipeline {
                                     sonar-scanner \
                                         -Dsonar.projectKey=devops-frontend \
                                         -Dsonar.sources=src \
+                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                                 """
                             }
@@ -48,7 +49,7 @@ pipeline {
                     }
                 }
 
-                stage('Scan Backend') {
+                stage('Analyze Backend') {
                     steps {
                         dir("${BACKEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
@@ -56,6 +57,7 @@ pipeline {
                                     sonar-scanner \
                                         -Dsonar.projectKey=devops-backend \
                                         -Dsonar.sources=. \
+                                        -Dsonar.exclusions=**/bin/**,**/obj/**,**/TestResults/** \
                                         -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
                                 """
                             }
