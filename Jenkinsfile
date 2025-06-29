@@ -56,12 +56,16 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
                                 sh """
-                                    sonar-scanner \
-                                        -Dsonar.projectKey=devops-backend \
-                                        -Dsonar.sources=. \
-                                        -Dsonar.inclusions=**/*.cs \
-                                        -Dsonar.exclusions=**/bin/**,**/obj/**,**/TestResults/** \
-                                        -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+                                    dotnet sonarscanner begin \
+                                    /k:"devops-backend" \
+                                    /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**" \
+                                    /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+                                    dotnet build
+
+                                    dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults/ || true
+
+                                    dotnet sonarscanner end
                                 """
                             }
                         }
