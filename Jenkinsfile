@@ -30,6 +30,40 @@ pipeline {
                 }
             }
         }
+
+        stage('Sonarqube scan') {
+            parallel {
+                stage('Scan Frontend') {
+                    steps {
+                        dir("${FRONTEND_DIR}") {
+                            withSonarQubeEnv('MySonar') {
+                                sh """
+                                    sonar-scanner \
+                                        -Dsonar.projectKey=devops-frontend \
+                                        -Dsonar.sources=src \
+                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                                """
+                            }
+                        }
+                    }
+                }
+
+                stage('Scan Backend') {
+                    steps {
+                        dir("${BACKEND_DIR}") {
+                            withSonarQubeEnv('MySonar') {
+                                sh """
+                                    sonar-scanner \
+                                        -Dsonar.projectKey=devops-backend \
+                                        -Dsonar.sources=. \
+                                        -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         stage('Test') {
             parallel {
@@ -93,10 +127,13 @@ pipeline {
         stage('Deploy Frontend') {
             steps {
                 script {
-                    sh """
-                        kubectl set image deployment/frontend frontend=georgesh/devops-masters-frontend:latest
-                        kubectl rollout status deployment/frontend --timeout=300s
-                    """
+                    withCredentials([file(credentialsId: 'kubeconfig-cred-id', variable: 'KUBECONFIG_FILE')]) {
+                        sh '''
+                            export KUBECONFIG=$KUBECONFIG_FILE
+                            kubectl set image deployment/frontend frontend=georgesh/devops-masters-frontend:latest
+                            kubectl rollout status deployment/frontend --timeout=300s
+                        '''
+                    }
                 }
             }
         }
@@ -104,10 +141,12 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 script {
-                    sh """
-                        kubectl set image deployment/backend backend=georgesh/devops-masters-backend:latest
-                        kubectl rollout status deployment/backend --timeout=300s
-                    """
+                    withCredentials([file(credentialsId: 'kubeconfig-cred-id', variable: 'KUBECONFIG_FILE')]) {
+                        sh """
+                            kubectl set image deployment/backend backend=georgesh/devops-masters-backend:latest
+                            kubectl rollout status deployment/backend --timeout=300s
+                        """
+                    }
                 }
             }
         }
