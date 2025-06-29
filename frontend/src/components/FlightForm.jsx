@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { validateFlightForm } from '../flightFrom.js'
 
 function FlightForm({ initialData, onSubmit, onCancel }) {
     const emptyForm = {
@@ -48,51 +49,10 @@ function FlightForm({ initialData, onSubmit, onCancel }) {
         }
     };
 
-    const validate = () => {
-        const newErrors = {};
-
-        if (!formData.departureDateTime) {
-            newErrors.departureDateTime = 'Укажите дату и время вылета';
-        }
-
-        if (!formData.arrivalDateTime) {
-            newErrors.arrivalDateTime = 'Укажите дату и время прибытия';
-        } else if (formData.departureDateTime && new Date(formData.arrivalDateTime) <= new Date(formData.departureDateTime)) {
-            newErrors.arrivalDateTime = 'Время прибытия должно быть позже времени вылета';
-        }
-
-        if (!formData.departureAirport) {
-            newErrors.departureAirport = 'Укажите аэропорт вылета';
-        }
-
-        if (!formData.destinationAirport) {
-            newErrors.destinationAirport = 'Укажите аэропорт прибытия';
-        } else if (formData.departureAirport && formData.departureAirport === formData.destinationAirport) {
-            newErrors.destinationAirport = 'Аэропорты вылета и прибытия не могут совпадать';
-        }
-
-        if (!formData.aircraftModel) {
-            newErrors.aircraftModel = 'Укажите модель самолета';
-        }
-
-        if (!formData.airline) {
-            newErrors.airline = 'Укажите авиакомпанию';
-        }
-
-        if (!formData.flightNumber) {
-            newErrors.flightNumber = 'Укажите номер рейса';
-        } else if (!/^[A-Z0-9]{2,8}$/.test(formData.flightNumber)) {
-            newErrors.flightNumber = 'Номер рейса должен состоять из 2-8 букв и цифр';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (validate()) {
+        if (validateFlightForm(formData)) {
             setIsSubmitting(true);
             try {
                 const submitData = {
