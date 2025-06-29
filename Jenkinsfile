@@ -42,6 +42,8 @@ pipeline {
                                         -Dsonar.projectKey=devops-frontend \
                                         -Dsonar.sources=src \
                                         -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
+                                        -Dsonar.tests=test \
+                                        -Dsonar.test.inclusions=test/**/*.test.jsx,test/**/*.test.js \
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                                 """
                             }
@@ -57,6 +59,7 @@ pipeline {
                                     sonar-scanner \
                                         -Dsonar.projectKey=devops-backend \
                                         -Dsonar.sources=. \
+                                        -Dsonar.inclusions=**/*.cs \
                                         -Dsonar.exclusions=**/bin/**,**/obj/**,**/TestResults/** \
                                         -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
                                 """
@@ -133,7 +136,7 @@ pipeline {
                         sh '''
                             export KUBECONFIG=$KUBECONFIG_FILE
                             kubectl set image deployment/frontend frontend=georgesh/devops-masters-frontend:latest
-                            kubectl rollout status deployment/frontend --timeout=300s
+                            kubectl rollout restart deployment frontend
                         '''
                     }
                 }
@@ -146,7 +149,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'kubeconfig-cred-id', variable: 'KUBECONFIG_FILE')]) {
                         sh """
                             kubectl set image deployment/backend backend=georgesh/devops-masters-backend:latest
-                            kubectl rollout status deployment/backend --timeout=300s
+                            kubectl rollout restart deployment backend
                         """
                     }
                 }
