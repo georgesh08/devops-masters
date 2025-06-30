@@ -56,7 +56,12 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
                                 sh """
-                                    dotnet-sonarscanner begin \
+                                    export DOTNET_CLI_HOME=\$(pwd)/.dotnet
+                                    mkdir -p .dotnet/tools
+
+                                    dotnet tool install dotnet-sonarscanner --tool-path ./tools
+
+                                    ./tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
                                     /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**" \
                                     /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
@@ -65,7 +70,7 @@ pipeline {
 
                                     dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults/ || true
 
-                                    dotnet-sonarscanner end
+                                    ./tools/dotnet-sonarscanner end
                                 """
                             }
                         }
