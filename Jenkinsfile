@@ -63,7 +63,7 @@ pipeline {
 
                                     ./tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
-                                    /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**" \
+                                    /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
                                     /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
                                     dotnet build
