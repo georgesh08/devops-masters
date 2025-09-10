@@ -93,13 +93,10 @@ pipeline {
         stage('Deploy Frontend') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'kubeconfig-cred-id', variable: 'KUBECONFIG_FILE')]) {
-                        sh '''
-                            export KUBECONFIG=$KUBECONFIG_FILE
-                            kubectl set image deployment/frontend frontend=georgesh/devops-masters-frontend:latest
-                            kubectl rollout restart deployment frontend
-                        '''
-                    }
+                    sh '''
+                        kubectl set image deployment/frontend frontend=georgesh08/devops-masters-frontend:latest
+                        kubectl rollout status deployment/frontend
+                    '''
                 }
             }
         }
@@ -107,12 +104,10 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'kubeconfig-cred-id', variable: 'KUBECONFIG_FILE')]) {
-                        sh """
-                            kubectl set image deployment/backend backend=georgesh/devops-masters-backend:latest
-                            kubectl rollout restart deployment backend
-                        """
-                    }
+                    sh """
+                        kubectl set image deployment/backend backend=georgesh08/devops-masters-backend:latest
+                        kubectl rollout status deployment/backend
+                    """
                 }
             }
         }
