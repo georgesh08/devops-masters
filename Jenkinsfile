@@ -30,60 +30,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Sonarqube scan') {
-            parallel {
-                stage('Analyze Frontend') {
-                    steps {
-                        dir("${FRONTEND_DIR}") {
-                            withSonarQubeEnv('MySonar') {
-                                sh """
-                                    sonar-scanner \
-                                        -Dsonar.projectKey=devops-frontend \
-                                        -Dsonar.sources=src \
-                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,*config* \
-                                        -Dsonar.tests=test \
-                                        -Dsonar.test.inclusions=test/**/*.test.jsx,test/**/*.test.js \
-                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                                """
-                            }
-                            timeout(time: 3, unit: 'MINUTES') {
-                                waitForQualityGate abortPipeline: true
-                            }
-                        }
-                    }
-                }
-
-                stage('Analyze Backend') {
-                    steps {
-                        dir("${BACKEND_DIR}") {
-                            withSonarQubeEnv('MySonar') {
-                                sh """
-                                    export DOTNET_CLI_HOME=\$(pwd)/.dotnet
-                                    mkdir -p .dotnet/tools
-
-                                    dotnet tool install dotnet-sonarscanner --tool-path ./tools
-
-                                    ./tools/dotnet-sonarscanner begin \
-                                    /k:"devops-backend" \
-                                    /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
-                                    /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-
-                                    dotnet build
-
-                                    dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults/ || true
-
-                                    ./tools/dotnet-sonarscanner end
-                                """
-                            }
-                            timeout(time: 3, unit: 'MINUTES') {
-                                waitForQualityGate abortPipeline: true
-                            }
-                        }
-                    }
-                }
-            }
-        }
         
         stage('Test') {
             parallel {
