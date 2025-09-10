@@ -47,7 +47,7 @@ pipeline {
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                                 """
                             }
-                            timeout(time: 5, unit: 'MINUTES') {
+                            timeout(time: 3, unit: 'MINUTES') {
                                 waitForQualityGate abortPipeline: true
                             }
                         }
@@ -76,7 +76,7 @@ pipeline {
                                     ./tools/dotnet-sonarscanner end
                                 """
                             }
-                            timeout(time: 5, unit: 'MINUTES') {
+                            timeout(time: 3, unit: 'MINUTES') {
                                 waitForQualityGate abortPipeline: true
                             }
                         }
