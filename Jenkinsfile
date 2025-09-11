@@ -116,18 +116,33 @@ pipeline {
                     ]) {
                         sh '''
                             #!/bin/bash
-                            response=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
-                            coverage=$(echo "$response" | jq -r '.component.measures[0].value')
+                            frontendResponse=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
+                            frontedCoverage=$(echo "frontendResponse" | jq -r '.component.measures[0].value')
 
-                            if [ -z "$coverage" ]; then
-                                echo "❌ Could not retrieve test coverage from SonarQube"
+                            if [ -z "frontedCoverage" ]; then
+                                echo "❌ Could not retrieve frontend test coverage from SonarQube"
                                 exit 1
                             fi
 
-                            if [ $(echo "$coverage >= 80" | bc -l) -eq 1 ]; then
-                                echo "✅ Coverage is good (${coverage}% >= 80%)"
+                            if [ $(echo "frontedCoverage >= 80" | bc -l) -eq 1 ]; then
+                                echo "✅ Frontend coverage is good (${frontedCoverage}% >= 80%)"
                             else
-                                echo "❌ Coverage is not good (${coverage}% < 80%)"
+                                echo "❌ Frontend coverage is not good (${frontedCoverage}% < 80%)"
+                                exit 1
+                            fi
+
+                            backendResponse=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-backend&metricKeys=coverage")
+                            backendCoverage=$(echo "backendResponse" | jq -r '.component.measures[0].value')
+
+                            if [ -z "backendCoverage" ]; then
+                                echo "❌ Could not retrieve backend test coverage from SonarQube"
+                                exit 1
+                            fi
+
+                            if [ $(echo "backendCoverage >= 80" | bc -l) -eq 1 ]; then
+                                echo "✅ Backend coverage is good (${backendCoverage}% >= 80%)"
+                            else
+                                echo "❌ Backend coverage is not good (${backendCoverage}% < 80%)"
                                 exit 1
                             fi
                         '''
