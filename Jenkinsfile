@@ -116,7 +116,7 @@ pipeline {
                     ]) {
                         sh """
                             #!/bin/bash
-                            response=$(curl -s -u \$SONAR_TOKEN: "\$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
+                            response=$(curl -s -u ${SONAR_TOKEN}: "${SONAR_HOST}/api/measures/component?component=devops-frontend&metricKeys=coverage")
                             coverage=$(echo "${response}" | jq -r '.component.measures[0].value')
 
                             if [[ -z "${coverage}" ]]; then
