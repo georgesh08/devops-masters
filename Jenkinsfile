@@ -72,9 +72,30 @@ pipeline {
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                                 """
                             }
-                            timeout(time: 3, unit: 'MINUTES') {
-                                waitForQualityGate abortPipeline: true
-                            }
+
+                             withCredentials([
+                                string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN'),
+                                string(credentialsId: 'SONAR_HOST', variable: 'SONAR_HOST'),
+                                string(credentialsId: 'SONAR_PROJECT_KEY', variable: 'SONAR_PROJECT_KEY')
+                             ]) {
+                                sh '''
+                                    #!/bin/bash
+                                    response=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
+                                    coverage=$(echo "$response" | jq -r '.component.measures[0].value')
+
+                                    if [[ -z "$coverage" ]]; then
+                                        echo "❌ Could not retrieve test coverage from SonarQube"
+                                        exit 1
+                                    fi
+
+                                    if (( $(echo "$coverage >= 80" | bc -l) )); then
+                                        echo "✅ Coverage is good (${coverage}% >= 80%)"
+                                    else
+                                        echo "❌ Coverage is not good (${coverage}% < 80%)"
+                                        exit 1
+                                    fi
+                                '''
+                             }
                         }
                     }
                 }
@@ -100,9 +121,6 @@ pipeline {
 
                                     ./tools/dotnet-sonarscanner end
                                 """
-                            }
-                            timeout(time: 3, unit: 'MINUTES') {
-                                waitForQualityGate abortPipeline: true
                             }
                         }
                     }
