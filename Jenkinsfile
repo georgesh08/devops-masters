@@ -83,13 +83,13 @@ pipeline {
                                 sh """
                                     dotnet tool install --global dotnet-sonarscanner
 
-                                    dotnet-sonarscanner begin \
+                                    dotnet sonarscanner begin \
                                     /k:"devops-backend" \
                                     /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
                                     /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
                                     /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
 
-                                    dotnet build --no-restore
+                                    dotnet build
 
                                     dotnet test --no-build --verbosity normal \
                                                             --collect:"XPlat Code Coverage" \
