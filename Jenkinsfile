@@ -119,12 +119,12 @@ pipeline {
                             response=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
                             coverage=$(echo "$response" | jq -r '.component.measures[0].value')
 
-                            if [[ -z "$coverage" ]]; then
+                            if [ -z "$coverage" ]; then
                                 echo "❌ Could not retrieve test coverage from SonarQube"
                                 exit 1
                             fi
 
-                            if (( $(echo "$coverage >= 80" | bc -l) )); then
+                            if [ $(echo "$coverage >= 80" | bc -l) -eq 1 ]; then
                                 echo "✅ Coverage is good (${coverage}% >= 80%)"
                             else
                                 echo "❌ Coverage is not good (${coverage}% < 80%)"
