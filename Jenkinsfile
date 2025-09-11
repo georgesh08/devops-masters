@@ -81,7 +81,10 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
                                 sh """
-                                    dotnet tool install --global dotnet-sonarscanner
+                                    if ! dotnet tool list -g | grep -q dotnet-sonarscanner; then
+                                        echo "Installing dotnet-sonarscanner..."
+                                        dotnet tool install --global dotnet-sonarscanner
+                                    fi
 
                                     dotnet sonarscanner begin \
                                     /k:"devops-backend" \
