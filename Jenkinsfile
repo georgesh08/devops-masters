@@ -89,8 +89,8 @@ pipeline {
                                    /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
                                     /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
-                                    /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
-                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
+                                    /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs"
 
                                     dotnet build
 
