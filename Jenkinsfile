@@ -116,10 +116,10 @@ pipeline {
                     ]) {
                         sh """
                             #!/bin/bash
-                            response=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
-                            coverage=$(echo "$response" | jq -r '.component.measures[0].value')
+                            response=$(curl -s -u \$SONAR_TOKEN: "\$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
+                            coverage=$(echo "${response}" | jq -r '.component.measures[0].value')
 
-                            if [[ -z "$coverage" ]]; then
+                            if [[ -z "${coverage}" ]]; then
                                 echo "❌ Could not retrieve test coverage from SonarQube"
                                 exit 1
                             fi
