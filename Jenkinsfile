@@ -81,21 +81,21 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             withSonarQubeEnv('MySonar') {
                                 sh """
-                                    export DOTNET_CLI_HOME=\$(pwd)/.dotnet
-                                    mkdir -p .dotnet/tools
+                                    dotnet tool install --global dotnet-sonarscanner
 
-                                    dotnet tool install dotnet-sonarscanner --tool-path ./tools
-
-                                    ./tools/dotnet-sonarscanner begin \
+                                    dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
-                                    /d:sonar.exclusions="**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
-                                    /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+                                    /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
+                                    /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
+                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs" \
 
-                                    dotnet build
+                                    dotnet build --no-restore
 
-                                    dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults/ || true
+                                    dotnet test --no-build --verbosity normal \
+                                                            --collect:"XPlat Code Coverage" \
+                                                            --results-directory ./TestResults/
 
-                                    ./tools/dotnet-sonarscanner end
+                                    dotnet sonarscanner end
                                 """
                             }
                         }
