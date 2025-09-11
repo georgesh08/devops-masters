@@ -114,12 +114,12 @@ pipeline {
                         string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN'),
                         string(credentialsId: 'SONAR_HOST', variable: 'SONAR_HOST'),
                     ]) {
-                        sh """
+                        sh '''
                             #!/bin/bash
-                            response=$(curl -s -u ${SONAR_TOKEN}: "${SONAR_HOST}/api/measures/component?component=devops-frontend&metricKeys=coverage")
-                            coverage=$(echo "${response}" | jq -r '.component.measures[0].value')
+                            response=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST/api/measures/component?component=devops-frontend&metricKeys=coverage")
+                            coverage=$(echo "$response" | jq -r '.component.measures[0].value')
 
-                            if [[ -z "${coverage}" ]]; then
+                            if [[ -z "$coverage" ]]; then
                                 echo "❌ Could not retrieve test coverage from SonarQube"
                                 exit 1
                             fi
@@ -130,7 +130,7 @@ pipeline {
                                 echo "❌ Coverage is not good (${coverage}% < 80%)"
                                 exit 1
                             fi
-                        """
+                        '''
                     }
                 }
             }
