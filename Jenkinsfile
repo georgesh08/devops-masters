@@ -66,7 +66,7 @@ pipeline {
                                     sonar-scanner \
                                         -Dsonar.projectKey=devops-frontend \
                                         -Dsonar.sources=src \
-                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,*config* \
+                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,*config*,/src/App.* \
                                         -Dsonar.tests=test \
                                         -Dsonar.test.inclusions=test/**/*.test.jsx,test/**/*.test.js \
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info

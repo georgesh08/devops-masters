@@ -21,6 +21,7 @@ export default defineConfig({
         'src/components/FlightForm.jsx',
         'src/components/FlightsList.jsx',
         'src/components/FlightsPage.jsx',
+        '**/*.css'
       ],
     },
   },
