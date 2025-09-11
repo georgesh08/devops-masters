@@ -86,7 +86,7 @@ pipeline {
                                         dotnet tool install --global dotnet-sonarscanner
                                     fi
 
-                                    dotnet sonarscanner begin \
+                                   /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
                                     /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
                                     /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
@@ -98,7 +98,7 @@ pipeline {
                                                             --collect:"XPlat Code Coverage" \
                                                             --results-directory ./TestResults/
 
-                                    dotnet sonarscanner end
+                                    /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner end
                                 """
                             }
                         }
