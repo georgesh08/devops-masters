@@ -88,30 +88,14 @@ pipeline {
 
                                    /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
-                                    /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
                                     /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
-                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,**/TestResults/**,Dockerfile,AirportTerminal/Migrations/**,*.json,Program.cs"
-
-
+                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,Dockerfile,**/Migrations/**,*.json,Program.cs"
                                 """
                                 sh 'dotnet restore'
                                 sh 'dotnet build --no-restore --configuration Release'
 
                                 sh """
-                                    dotnet test --no-build --configuration Release \
-                                    /p:CollectCoverage=true \
-                                    /p:CoverletOutputFormat=opencover \
-                                    /p:CoverletOutput=coverage.opencover.xml \
-                                    /p:Exclude="[*.Tests]*"
-
-                                    dotnet test --configuration Release \
-                                    /p:CollectCoverage=true \
-                                    /p:CoverletOutputFormat=cobertura \
-                                    /p:CoverletOutput=coverage.cobertura.xml \
-                                    /p:Exclude="[*.Tests]*"
-
-                                    echo "=== Generated files ==="
-                                    ls -la coverage.*
+                                    dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura,opencover
 
                                     /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner end
                                 """
