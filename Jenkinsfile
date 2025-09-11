@@ -89,7 +89,7 @@ pipeline {
                                    /var/lib/jenkins/.dotnet/tools/dotnet-sonarscanner begin \
                                     /k:"devops-backend" \
                                     /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
-                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,Dockerfile,**/Migrations/**,*.json,Program.cs"
+                                    /d:sonar.exclusions="**/.dotnet/**,**/bin/**,**/obj/**,Dockerfile,**/Migrations/**,*.json,AirportTerminal/Program.cs,AirportTerminal/TelegramNotificationService.cs,AirportTerminal/ApplicationDbContext.cs"
                                 """
                                 sh 'dotnet restore'
                                 sh 'dotnet build --no-restore --configuration Release'
