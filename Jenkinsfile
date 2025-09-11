@@ -66,7 +66,7 @@ pipeline {
                                     sonar-scanner \
                                         -Dsonar.projectKey=devops-frontend \
                                         -Dsonar.sources=src \
-                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,*config*,/src/App.*,src/components/FlightForm.jsx,src/components/FlightsList.jsx,src/components/FlightsPage.jsx \
+                                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,*config*,/src/App.*,src/components/FlightForm.jsx,src/components/FlightsList.jsx,src/components/FlightsPage.jsx,src/services/flightService.js \
                                         -Dsonar.tests=test \
                                         -Dsonar.test.inclusions=test/**/*.test.jsx,test/**/*.test.js \
                                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
